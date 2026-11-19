@@ -66,7 +66,7 @@ class SpeechToText:
             return ""
 
         default_prompt = (
-            "Jarvis, Hey Jarvis, open Spotify, open Chrome, open VS Code, "
+            "Velo, Hey Velo, open Spotify, open Chrome, open VS Code, "
             "play music, pause, resume, next track, previous track, "
             "volume up, volume down, mute, unmute, system status, "
             "game mode, desktop mode, test mode, quit, bye bye."

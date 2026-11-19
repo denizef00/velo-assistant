@@ -54,6 +54,6 @@ class TextToSpeech:
 
 if __name__ == "__main__":
     tts = TextToSpeech()
-    tts.speak("Jarvis voice engine is online.")
+    tts.speak("Velo voice engine is online.")
     import time
     time.sleep(3)

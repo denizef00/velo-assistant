@@ -9,7 +9,7 @@ from core.llm_parser import LocalCommandParser
 from moduls.desktop_mode.system_ctrl import SystemController
 
 
-class JarvisMode(Enum):
+class VeloMode(Enum):
     GAME = "Game Mode"
     DESKTOP = "Desktop Mode"
     TEST = "Test Mode"
@@ -17,7 +17,7 @@ class JarvisMode(Enum):
 
 class StateManager:
     def __init__(self, ui_callback=None, exit_callback=None):
-        self.current_mode = JarvisMode.DESKTOP
+        self.current_mode = VeloMode.DESKTOP
         self.ui_callback = ui_callback
         self.exit_callback = exit_callback
         self.tts = TextToSpeech()
@@ -29,11 +29,11 @@ class StateManager:
 
         if isinstance(new_mode, str):
             clean_str = new_mode.strip().lower()
-            for mode in JarvisMode:
+            for mode in VeloMode:
                 if (clean_str in mode.value.lower()) or (clean_str in mode.name.lower()):
                     target_mode = mode
                     break
-        elif isinstance(new_mode, JarvisMode):
+        elif isinstance(new_mode, VeloMode):
             target_mode = new_mode
 
         if not target_mode:
@@ -56,19 +56,19 @@ class StateManager:
         self._on_mode_changed(old_mode, self.current_mode)
         return msg
 
-    def _on_mode_changed(self, old_mode: JarvisMode, new_mode: JarvisMode):
-        if new_mode == JarvisMode.GAME:
+    def _on_mode_changed(self, old_mode: VeloMode, new_mode: VeloMode):
+        if new_mode == VeloMode.GAME:
             self._log("[Game Mode] Telemetry services online.")
-        elif new_mode == JarvisMode.DESKTOP:
+        elif new_mode == VeloMode.DESKTOP:
             self._log("[Desktop Mode] System controller and Local LLM ready.")
-        elif new_mode == JarvisMode.TEST:
+        elif new_mode == VeloMode.TEST:
             self._log("[Test Mode] Sandbox environment active.")
 
     def process_command(self, command_text: str) -> str:
         cmd = command_text.strip().lower()
 
         # 1. KAPANIŞ KOMUTLARI (Quit, Bye, Kill yourself vb.)
-        if any(k in cmd for k in ["quit", "bye bye", "bye", "exit", "kill yourself", "close jarvis", "goodbye"]):
+        if any(k in cmd for k in ["quit", "bye bye", "bye", "exit", "kill yourself", "close velo", "goodbye"]):
             response = "Goodbye sir. Shutting down system."
             self._log(f"[{self.current_mode.value}]: {response}")
             self.tts.speak(response)
@@ -100,14 +100,14 @@ class StateManager:
 
         # 3. MOD DEĞİŞTİRME KOMUTLARI
         if any(k in cmd for k in ["game mode", "switch to game", "gaming mode"]):
-            return self.set_mode(JarvisMode.GAME)
+            return self.set_mode(VeloMode.GAME)
         elif any(k in cmd for k in ["desktop mode", "switch to desktop", "normal mode"]):
-            return self.set_mode(JarvisMode.DESKTOP)
+            return self.set_mode(VeloMode.DESKTOP)
         elif any(k in cmd for k in ["test mode", "switch to test", "sandbox"]):
-            return self.set_mode(JarvisMode.TEST)
+            return self.set_mode(VeloMode.TEST)
 
         # 4. MASAÜSTÜ MODU İŞLEYİCİSİ (Hibrit Yapı: Hızlı Kural -> Yerel LLM)
-        if self.current_mode == JarvisMode.DESKTOP:
+        if self.current_mode == VeloMode.DESKTOP:
             # 1. Aşama: Hızlı Kural & Sabit Komut Kontrolü (0 ms gecikme)
             result = self.system_ctrl.handle_command(cmd)
 
@@ -123,7 +123,7 @@ class StateManager:
                 response = f"I'm not sure how to help with '{command_text}', sir."
 
         # 5. OYUN VEYA TEST MODU İŞLEYİCİLERİ
-        elif self.current_mode == JarvisMode.GAME:
+        elif self.current_mode == VeloMode.GAME:
             response = f"Game mode command received: '{command_text}'"
         else:
             response = f"Test mode command received: '{command_text}'"

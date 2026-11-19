@@ -1,5 +1,5 @@
 # theme.py
-# Jarvis UI Renk ve Stil Konfigürasyonu
+# Velo UI Renk ve Stil Konfigürasyonu
 
 THEME_CONFIG = {
     "appearance_mode": "dark",      # "dark" veya "light"
@@ -32,7 +32,7 @@ THEME_CONFIG = {
     "terminal": {
         "bg": "#090A0F",            # Terminal içi koyu arka plan
         "text": "#00FF66",          # Terminal çıktı metin rengi (Hacker/Cyber neon yeşil)
-        "prompt_symbol": "Jarvis> ", # Terminal başlangıç simgesi
+        "prompt_symbol": "Velo> ", # Terminal başlangıç simgesi
         "input_bg": "#141722",      # Metin giriş kutusu arka planı
         "border_color": "#2A2E3D"
     },

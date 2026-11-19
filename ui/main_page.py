@@ -8,18 +8,18 @@ import customtkinter as ctk
 import re
 import pygame
 from config.theme import THEME_CONFIG
-from core.state_manager import StateManager, JarvisMode
+from core.state_manager import StateManager, VeloMode
 from audio.stt import SpeechToText
 
 ctk.set_appearance_mode(THEME_CONFIG["appearance_mode"])
 ctk.set_default_color_theme(THEME_CONFIG["color_theme"])
 
 
-class JarvisUI(ctk.CTk):
+class VeloUI(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Vole - Control Center")
+        self.title("Velo - Control Center")
         self.geometry("680x520")
         self.minsize(550, 420)
         self.configure(fg_color=THEME_CONFIG["bg_dark"])
@@ -52,7 +52,7 @@ class JarvisUI(ctk.CTk):
         self.btn_game = ctk.CTkButton(
             self.top_frame, text="🎮 GAME MODE", font=THEME_CONFIG["fonts"]["button"],
             fg_color=btn_game["fg"], hover_color=btn_game["hover"], text_color=btn_game["text"],
-            height=40, corner_radius=8, command=lambda: self.on_mode_button_click(JarvisMode.GAME)
+            height=40, corner_radius=8, command=lambda: self.on_mode_button_click(VeloMode.GAME)
         )
         self.btn_game.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 
@@ -60,7 +60,7 @@ class JarvisUI(ctk.CTk):
         self.btn_desktop = ctk.CTkButton(
             self.top_frame, text="💻 DESKTOP MODE", font=THEME_CONFIG["fonts"]["button"],
             fg_color=btn_desk["fg"], hover_color=btn_desk["hover"], text_color=btn_desk["text"],
-            height=40, corner_radius=8, command=lambda: self.on_mode_button_click(JarvisMode.DESKTOP)
+            height=40, corner_radius=8, command=lambda: self.on_mode_button_click(VeloMode.DESKTOP)
         )
         self.btn_desktop.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
@@ -68,7 +68,7 @@ class JarvisUI(ctk.CTk):
         self.btn_test = ctk.CTkButton(
             self.top_frame, text="🧪 TEST MODE", font=THEME_CONFIG["fonts"]["button"],
             fg_color=btn_test["fg"], hover_color=btn_test["hover"], text_color=btn_test["text"],
-            height=40, corner_radius=8, command=lambda: self.on_mode_button_click(JarvisMode.TEST)
+            height=40, corner_radius=8, command=lambda: self.on_mode_button_click(VeloMode.TEST)
         )
         self.btn_test.grid(row=0, column=2, padx=10, pady=10, sticky="ew")
 
@@ -119,7 +119,7 @@ class JarvisUI(ctk.CTk):
         if not self.is_hands_free_active:
             self.is_hands_free_active = True
             self.btn_mic.configure(text="🛑 Stop Auto", fg_color="#E03131")
-            self.write_to_terminal("[System] Hands-Free Mode Active. Say 'Vole <command>'...")
+            self.write_to_terminal("[System] Hands-Free Mode Active. Say 'Velo <command>'...")
             threading.Thread(target=self._hands_free_loop, daemon=True).start()
         else:
             self.is_hands_free_active = False
@@ -140,7 +140,7 @@ class JarvisUI(ctk.CTk):
     def _hands_free_loop(self):
         """Tek nefeste komut algılayan düşük gecikmeli dinleme döngüsü."""
         while self.is_hands_free_active:
-                # Jarvis o an konuşuyorsa kendi sesini dinlememek için bekle
+                # Velo o an konuşuyorsa kendi sesini dinlememek için bekle
             if pygame.mixer.get_init() and pygame.mixer.music.get_busy():
                 time.sleep(0.1)
                 continue
@@ -157,14 +157,14 @@ class JarvisUI(ctk.CTk):
                 woke_up, command = self._extract_command_after_wake_word(raw_text)
 
                 if woke_up:
-                    # SENARYO 1: Tek nefeste komut verildi ("Jarvis open Spotify")
+                    # SENARYO 1: Tek nefeste komut verildi ("Velo open Spotify")
                     if command:
                         self.write_to_terminal(f"You (Voice): '{command}'")
                         self.state_manager.process_command(command)
 
-                    # SENARYO 2: Sadece "Jarvis" dendi, devamı gelmedi
+                    # SENARYO 2: Sadece "Velo" dendi, devamı gelmedi
                     else:
-                        self.write_to_terminal("🤖 [Jarvis]: Yes?")
+                        self.write_to_terminal("🤖 [Velo]: Yes?")
                         self.state_manager.tts.speak("Yes?")
                         time.sleep(0.5)
 
@@ -191,7 +191,7 @@ class JarvisUI(ctk.CTk):
         self.destroy()
         os._exit(0)
 
-    def on_mode_button_click(self, mode: JarvisMode):
+    def on_mode_button_click(self, mode: VeloMode):
         self.state_manager.set_mode(mode)
 
     def on_send_command(self):

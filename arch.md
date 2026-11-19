@@ -1,4 +1,4 @@
-mini_jarvis/
+velo/
 │
 ├── config/
 │ ├── **init**.py

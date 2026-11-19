@@ -1,6 +1,6 @@
 # main.py
-from ui.main_page import JarvisUI
+from ui.main_page import VeloUI
 
 if __name__ == "__main__":
-    app = JarvisUI()
+    app = VeloUI()
     app.mainloop()

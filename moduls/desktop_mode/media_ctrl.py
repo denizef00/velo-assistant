@@ -98,33 +98,4 @@ class MediaController:
             return self.previous_track()
 
         return None
-        """Sabit ses ve medya komutlarını yakalar."""
-        cmd = command.lower().strip().rstrip(".,!?")
-
-        # 1. Ses Artırma
-        if any(k in cmd for k in ["volume up", "increase volume", "turn up the volume", "louder", "raise volume"]):
-            steps = 10 if any(w in cmd for w in ["a lot", "max", "way up"]) else 5
-            return self.volume_up(steps=steps)
-
-        # 2. Ses Kısma
-        elif any(k in cmd for k in ["volume down", "decrease volume", "turn down the volume", "lower volume", "quieter"]):
-            steps = 10 if any(w in cmd for w in ["a lot", "min", "way down"]) else 5
-            return self.volume_down(steps=steps)
-
-        # 3. Sistem Sesini Kapatma / Açma (Jarvis'in kendi 'mute' komutuyla çakışmaması için)
-        elif any(k in cmd for k in ["mute system", "unmute system", "mute volume", "unmute volume", "mute pc", "system mute"]):
-            return self.toggle_system_mute()
-
-        # 4. Medya Duraklatma / Devam Ettirme
-        # Not: Tek başına "play" denirse medyayı devam ettirir; "play <şarkı>" denirse YouTube'a gider.
-        elif cmd in ["pause", "pause music", "pause video", "stop music", "resume", "resume music", "continue", "play", "play music"]:
-            return self.play_pause()
-
-        # 5. Sonraki / Önceki Parça
-        elif any(k in cmd for k in ["next track", "next song", "skip track", "skip song", "next video"]):
-            return self.next_track()
-
-        elif any(k in cmd for k in ["previous track", "previous song", "last song", "go back track"]):
-            return self.previous_track()
-
-        return None
+        

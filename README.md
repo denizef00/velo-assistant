@@ -7,7 +7,7 @@ Velo combines a zero-latency deterministic rule engine with local LLM intent par
 
 ## ✨ Key Features
 
-- **Hands-Free Wake-Word & VAD:** Continuous background listening with a 400ms pre-roll audio buffer (preventing clipped first syllables) and automatic silence cut-off (`0.75s`). Supports single-shot commands (e.g., *"Jarvis open Spotify"*).
+- **Hands-Free Wake-Word & VAD:** Continuous background listening with a 400ms pre-roll audio buffer (preventing clipped first syllables) and automatic silence cut-off (`0.75s`). Supports single-shot commands (e.g., *"Velo open Spotify"*).
 - **Hybrid Intent Engine:**
   - **Fast Path (0ms latency):** Instant execution for hardware media keys, system volume, CPU/RAM telemetry, and direct triggers.
   - **Smart Path (Local LLM):** Falls back to a local `qwen2.5:1.5b` model via Ollama to parse unstructured natural language into structured JSON intents (`LAUNCH_APP`, `PLAY_MEDIA`, `WEB_SEARCH`, `MEDIA_CTRL`, `CHAT`).
@@ -102,12 +102,12 @@ Click **`🎙️ Auto Listen`** in the interface to enable hands-free wake-word 
 
 | Category | Example Voice / Text Input | Action |
 | :--- | :--- | :--- |
-| **App Launching** | *"Jarvis, fire up Discord"* / *"Open Calculator"* | Finds and launches the app dynamically |
-| **Direct Media** | *"Jarvis, play Linkin Park Numb"* | Fetches and plays the top YouTube result |
-| **Media & Volume** | *"Jarvis, volume up"* / *"Pause"* / *"Next track"* | Triggers Win32 media/volume keys |
-| **Web Search** | *"Jarvis, look up Python asyncio tutorials"* | Opens Google search results |
-| **System Telemetry** | *"Jarvis, system status"* | Reports real-time CPU & RAM usage |
-| **General Q&A** | *"Jarvis, what is the speed of light?"* | Answers directly via local LLM |
+| **App Launching** | *"Velo, fire up Discord"* / *"Open Calculator"* | Finds and launches the app dynamically |
+| **Direct Media** | *"Velo,i play Linkin Park Numb"* | Fetches and plays the top YouTube result |
+| **Media & Volume** | *"Velo, volume up"* / *"Pause"* / *"Next track"* | Triggers Win32 media/volume keys |
+| **Web Search** | *"Velo, look up Python asyncio tutorials"* | Opens Google search results |
+| **System Telemetry** | *"Velo, system status"* | Reports real-time CPU & RAM usage |
+| **General Q&A** | *"Velo, what is the speed of light?"* | Answers directly via local LLM |
 | **Assistant Control** | *"Mute"* / *"Unmute"* / *"Quit"* / *"Bye bye"* | Toggles TTS audio or cleanly exits app |
 
 ---
