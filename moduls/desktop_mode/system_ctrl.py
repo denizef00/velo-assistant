@@ -122,6 +122,7 @@ class SystemController:
             return self.app_launcher.launch(app_name)
 
         return None
+
     def execute_llm_intent(self, parsed_data: dict) -> str:
         """Yerel LLM'den dönen JSON niyetini çalıştırır."""
         intent = parsed_data.get("intent", "UNKNOWN")
@@ -151,6 +152,8 @@ class SystemController:
                 "play_pause": self.media_ctrl.play_pause,
                 "next": self.media_ctrl.next_track,
                 "previous": self.media_ctrl.previous_track,
+                "seek_forward": self.media_ctrl.seek_forward,
+                "seek_backward": self.media_ctrl.seek_backward,
             }
             action = mapping.get(param)
             if action:
