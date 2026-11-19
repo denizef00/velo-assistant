@@ -6,3 +6,4 @@ scipy
 psutil
 pynput
 pygame
+pyperclip

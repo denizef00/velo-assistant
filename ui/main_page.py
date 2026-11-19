@@ -46,7 +46,7 @@ class JarvisUI(ctk.CTk):
 
     def _boot_sequence(self):
         self.write_to_terminal("Initializing Velo audio & intelligence engines...")
-        self.stt = SpeechToText(model_size="base.en", device_index=None)
+        self.stt = SpeechToText(model_size="base.en", device_index=2)
         self.is_hands_free_active = True
         self.after(0, lambda: self.btn_mic.configure(text="🎙️ Mic: ON", fg_color="#2B8A3E", hover_color="#237032"))
         self.state_manager.greet_user()
@@ -73,13 +73,14 @@ class JarvisUI(ctk.CTk):
         )
         self.btn_desktop.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
-        btn_test = THEME_CONFIG["buttons"]["test"]
-        self.btn_test = ctk.CTkButton(
-            self.top_frame, text="🧪 TEST MODE", font=THEME_CONFIG["fonts"]["button"],
-            fg_color=btn_test["fg"], hover_color=btn_test["hover"], text_color=btn_test["text"],
-            height=40, corner_radius=8, command=lambda: self.on_mode_button_click(JarvisMode.TEST)
+        btn_dev = THEME_CONFIG["buttons"].get("dev", THEME_CONFIG["buttons"].get("test"))
+        self.btn_dev = ctk.CTkButton(
+            self.top_frame, text="🛠️ DEV MODE", font=THEME_CONFIG["fonts"]["button"],
+            fg_color=btn_dev["fg"], hover_color=btn_dev["hover"], text_color=btn_dev["text"],
+            height=40, corner_radius=8, command=lambda: self.on_mode_button_click(JarvisMode.DEV)
         )
-        self.btn_test.grid(row=0, column=2, padx=10, pady=10, sticky="ew")
+        self.btn_dev.grid(row=0, column=2, padx=10, pady=10, sticky="ew")
+        self.btn_test = self.btn_dev  # Geriye dönük uyumluluk
 
     def _build_terminal(self):
         self.terminal_frame = ctk.CTkFrame(self, fg_color=THEME_CONFIG["card_bg"], corner_radius=12)
@@ -222,3 +223,7 @@ class JarvisUI(ctk.CTk):
             self.write_to_terminal(f"You: {user_text}")
             self.state_manager.process_command(user_text)
             self.cmd_input.delete(0, "end")
+
+
+# Alias for main.py entry point
+VeloUI = JarvisUI

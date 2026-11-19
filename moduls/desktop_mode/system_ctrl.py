@@ -5,8 +5,12 @@ import urllib.parse
 import urllib.request
 import webbrowser
 import psutil
-from moduls.desktop_mode.app_launcher import DynamicAppLauncher
-from moduls.desktop_mode.media_ctrl import MediaController
+try:
+    from modules.desktop_mode.app_launcher import DynamicAppLauncher
+    from modules.desktop_mode.media_ctrl import MediaController
+except ImportError:
+    from moduls.desktop_mode.app_launcher import DynamicAppLauncher
+    from moduls.desktop_mode.media_ctrl import MediaController
 
 
 class SystemController:

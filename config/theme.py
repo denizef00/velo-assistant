@@ -21,8 +21,13 @@ THEME_CONFIG = {
             "hover": "#008554",
             "text": "#FFFFFF"
         },
+        "dev": {
+            "fg": "#E5A93C",        # Dev Modu Buton Rengi (Sarı/Turuncu tonu)
+            "hover": "#B8862E",
+            "text": "#FFFFFF"
+        },
         "test": {
-            "fg": "#E5A93C",        # Test Modu Buton Rengi (Sarı/Turuncu tonu)
+            "fg": "#E5A93C",        # Test Modu Buton Rengi (Geriye dönük uyumluluk)
             "hover": "#B8862E",
             "text": "#FFFFFF"
         }

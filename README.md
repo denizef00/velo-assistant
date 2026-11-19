@@ -13,7 +13,12 @@ Velo combines a zero-latency deterministic rule engine with local LLM intent par
   - **Smart Path (Local LLM):** Falls back to a local `qwen2.5:1.5b` model via Ollama to parse unstructured natural language into structured JSON intents (`LAUNCH_APP`, `PLAY_MEDIA`, `WEB_SEARCH`, `MEDIA_CTRL`, `CHAT`).
 - **Dynamic Windows App Launcher:** Automatically indexes Windows Start Menu shortcuts (`.lnk`) and Registry `App Paths` with fuzzy matching (`difflib`) to launch any installed software without hardcoded paths.
 - **Zero-Latency Media & System Control:** Uses native Windows `ctypes` Virtual-Key events for instant volume and playback control across all active media players, plus direct YouTube video playback and search.
-- **Modern Dark UI:** Built with `CustomTkinter`, featuring a real-time command terminal, mode switching (`Desktop`, `Game`, `Test`), and one-click `Auto Listen` toggle.
+- **Multi-Mode Modular Architecture:**
+  - **Desktop Mode:** Dynamic app launcher, media controls, web searching, and system performance.
+  - **Game Mode:** Assetto Corsa Windows Shared Memory telemetry (fuel, tire temps, gear, speed, lap time), multi-app racing launcher (Content Manager + Discord), and hardware thermal monitoring.
+  - **Dev Mode:** VS Code workspace launcher with optional lo-fi focus beats, plus intelligent clipboard code/error debugging.
+- **Short-Term Conversation Memory:** Sliding window deque (maxlen=6) preserving conversational context for natural follow-ups and seamless daily check-ins.
+- **Modern Dark UI:** Built with `CustomTkinter`, featuring a real-time command terminal, mode switching (`Desktop`, `Game`, `Dev`), and one-click `Mic` and `Voice` toggles.
 
 ---
 
@@ -117,5 +122,7 @@ Click **`🎙️ Auto Listen`** in the interface to enable hands-free wake-word 
 - [x] Hands-free VAD wake-word pipeline & accent optimization
 - [x] Dynamic Windows application indexing
 - [x] Hybrid Rule-Based + Local Ollama LLM intent parser
-- [ ] **Game Mode:** Live sim-racing telemetry integration (Assetto Corsa shared memory)
+- [x] Short-Term Conversation Memory (`deque(maxlen=6)`)
+- [x] **Game Mode:** Live sim-racing telemetry integration (Assetto Corsa shared memory), hardware status, and racing profile launcher
+- [x] **Dev Mode:** Workspace launcher and AI-powered clipboard debugger
 - [ ] Configurable wake-word and microphone device selector in UI

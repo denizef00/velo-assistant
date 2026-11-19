@@ -1,38 +1,43 @@
 velo/
 │
 ├── config/
-│ ├── **init**.py
-│ └── theme.py
+│   ├── __init__.py
+│   └── theme.py
 │
 ├── ui/
-│ ├── **init**.py
-│ └── main_window.py
+│   ├── __init__.py
+│   └── main_page.py
 │
 ├── core/
-│ ├── **init**.py
-│ ├── state_manager.py
-│ └── router.py
+│   ├── __init__.py
+│   ├── state_manager.py
+│   └── llm_parser.py
 │
 ├── modules/
-│ ├── **init**.py
-│ │
-│ ├── game_mode/
-│ │ ├── **init**.py
-│ │ └── telemetry.py
-│ │
-│ ├── desktop_mode/
-│ │ ├── **init**.py
-│ │ ├── web_agent.py
-│ │ └── system_ctrl.py
-│ │
-│ └── test_mode/
-│ ├── **init**.py
-│ └── sandbox.py
+│   ├── __init__.py
+│   │
+│   ├── desktop_mode/
+│   │   ├── __init__.py
+│   │   ├── app_launcher.py
+│   │   ├── media_ctrl.py
+│   │   └── system_ctrl.py
+│   │
+│   ├── game_mode/
+│   │   ├── __init__.py
+│   │   ├── ac_telemetry.py
+│   │   └── game_ctrl.py
+│   │
+│   └── dev_mode/
+│       ├── __init__.py
+│       └── dev_ctrl.py
 │
 ├── audio/
-│ ├── **init**.py
-│ ├── stt.py
-│ └── tts.py
+│   ├── __init__.py
+│   ├── stt.py
+│   └── tts.py
+│
+├── tests/
+│   └── test_velo.py
 │
 ├── logs/
 ├── requirements.txt

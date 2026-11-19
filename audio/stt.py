@@ -69,7 +69,7 @@ class SpeechToText:
             "Velo, Hey Velo, open Spotify, open Chrome, open VS Code, "
             "play music, pause, resume, next track, previous track, "
             "volume up, volume down, mute, unmute, system status, "
-            "game mode, desktop mode, test mode, quit, bye bye."
+            "game mode, desktop mode, dev mode, quit, bye bye."
         )
 
         try:
