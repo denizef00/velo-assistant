@@ -1,14 +1,38 @@
 # modules/desktop_mode/app_launcher.py
 
 import os
-import subprocess
 import difflib
-
+import shutil
+import subprocess
 if os.name == "nt":
     import winreg
 
+ALIASES = {
+    "vscode": "visual studio code",
+    "vs code": "visual studio code",
+    "code": "visual studio code",
+    "vs": "visual studio 2022",
+    "visual studio": "visual studio 2022",
+    "ac": "content manager",
+    "assetto": "content manager",
+}
 
+DIRECT_EXECUTABLES = {
+    "visual studio code": [
+        shutil.which("code"),
+        os.path.expandvars(r"%LOCALAPPDATA%\Programs\Microsoft VS Code\Code.exe"),
+        r"C:\Program Files\Microsoft VS Code\Code.exe",
+    ]
+}
+# modules/desktop_mode/app_launcher.py
+
+URI_APPS = {
+    "spotify": "spotify:",
+    "settings": "ms-settings:",
+    "calculator": "calculator:",
+}
 class DynamicAppLauncher:
+    
     def __init__(self):
         self.app_cache = {}
         self.refresh_apps()
@@ -71,35 +95,40 @@ class DynamicAppLauncher:
             except Exception:
                 continue
 
-    def launch(self, query: str) -> str:
-        """Verilen uygulama adını tam, kısmi veya benzer eşleşmeyle bulup açar."""
-        target = query.strip().lower()
-        if not target:
-            return "Please specify an application name."
+    def launch(self, app_name: str) -> str:
+        query = app_name.lower().strip()
+        query = ALIASES.get(query, query)
+        
+        # 0. Doğrudan Windows URI Protokolü (Spotify vb. UWP uygulamaları için kesin çözüm)
+        if query in URI_APPS:
+            os.startfile(URI_APPS[query])
+            return f"Opening {query.title()}."
+        # 1. Doğrudan EXE / PATH kontrolü (VS Code vb. için kesin çözüm)
+        if query in DIRECT_EXECUTABLES:
+            for exe_path in DIRECT_EXECUTABLES[query]:
+                if exe_path and os.path.exists(exe_path):
+                    subprocess.Popen([exe_path], shell=True)
+                    return f"Opening {query.title()}."
 
-        # 1. Tam Eşleşme (Örn: "spotify" -> "spotify")
-        if target in self.app_cache:
-            return self._execute(target, self.app_cache[target])
+        # 2. Tam isim eşleşmesi
+        if query in self.app_cache:
+            os.startfile(self.app_cache[query])
+            return f"Opening {query.title()}."
 
-        # 2. İçeren Eşleşme (Örn: "code" -> "visual studio code", "assetto" -> "assetto corsa")
-        partial_matches = [name for name in self.app_cache if target in name]
-        if partial_matches:
-            # En kısa/en yakın isimli eşleşmeyi seç
-            best_partial = min(partial_matches, key=len)
-            return self._execute(best_partial, self.app_cache[best_partial])
+        # 3. İçinde tam geçen en kısa eşleşme
+        exact_contains = [name for name in self.app_cache if query in name]
+        if exact_contains:
+            best_match = min(exact_contains, key=len)
+            os.startfile(self.app_cache[best_match])
+            return f"Opening {best_match.title()}."
 
-        # 3. Yakın Kelime Eşleşmesi / Fuzzy Match (STT ufak harf hatası yaparsa)
-        fuzzy_matches = difflib.get_close_matches(target, self.app_cache.keys(), n=1, cutoff=0.55)
-        if fuzzy_matches:
-            best_fuzzy = fuzzy_matches[0]
-            return self._execute(best_fuzzy, self.app_cache[best_fuzzy])
+        # 4. Yüksek eşikli fuzzy match (0.85 ile VS <-> VS Code karışmasını önler)
+        matches = difflib.get_close_matches(query, self.app_cache.keys(), n=1, cutoff=0.85)
+        if matches:
+            os.startfile(self.app_cache[matches[0]])
+            return f"Opening {matches[0].title()}."
 
-        # 4. Sistem komutu olarak çalıştırmayı dene (calc, cmd, taskmgr, ms-settings: vb.)
-        try:
-            subprocess.Popen(f"start {target}", shell=True)
-            return f"Attempting to start {target}."
-        except Exception:
-            return f"I couldn't find an application named {query}."
+        return f"I couldn't find an application named {app_name}."
 
     def _execute(self, app_name: str, path: str) -> str:
         try:
@@ -107,3 +136,4 @@ class DynamicAppLauncher:
             return f"Launching {app_name.title()}."
         except Exception as e:
             return f"Found {app_name.title()}, but failed to launch it: {e}"
+

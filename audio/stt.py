@@ -1,19 +1,30 @@
-# audio/stt.py
-
+# audio/stt.py (Dosyanın üst kısmına ekle)
+import builtins
 import os
 from collections import deque
 import sounddevice as sd
 import numpy as np
 from faster_whisper import WhisperModel
 
+# Uygulama açık kaldığı sürece Whisper modelini RAM'de tutar
+if not hasattr(builtins, "_VELO_WHISPER_CACHE"):
+    builtins._VELO_WHISPER_CACHE = {}
 
 class SpeechToText:
     def __init__(self, model_size="base.en", device_index=2):
         os.makedirs("logs", exist_ok=True)
-        print(f"[STT] Loading Whisper '{model_size}' model...")
-        self.model = WhisperModel(model_size, device="cpu", compute_type="int8")
         self.sample_rate = 16000
         self.device_index = device_index
+
+        if model_size not in builtins._VELO_WHISPER_CACHE:
+            print(f"[STT] Loading Whisper '{model_size}' into persistent RAM...")
+            builtins._VELO_WHISPER_CACHE[model_size] = WhisperModel(
+                model_size, device="cpu", compute_type="int8"
+            )
+        else:
+            print(f"[STT] Reusing cached Whisper '{model_size}' (0ms load).")
+
+        self.model = builtins._VELO_WHISPER_CACHE[model_size]
 
     def listen_and_get_audio(self, silence_threshold=550, silence_duration=0.75, max_duration=8.0) -> np.ndarray:
         """
@@ -83,7 +94,8 @@ class SpeechToText:
                 vad_filter=True,
                 initial_prompt=prompt if prompt else default_prompt
             )
-            return "".join([segment.text for segment in segments]).strip()
+            raw_text = "".join([segment.text for segment in segments]).strip()
+            return raw_text.rstrip(".,!?;:")
         except Exception as e:
             print(f"[STT Error]: {e}")
             return ""

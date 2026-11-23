@@ -8,18 +8,13 @@ from enum import Enum
 from typing import Optional, Union
 from audio.tts import TextToSpeech
 from core.llm_parser import LocalCommandParser
-
-try:
-    from modules.desktop_mode.system_ctrl import SystemController
-    from modules.game_mode.game_ctrl import GameController
-    from modules.dev_mode.dev_ctrl import DevController
-except ImportError:
-    from moduls.desktop_mode.system_ctrl import SystemController
-    from modules.game_mode.game_ctrl import GameController
-    from modules.dev_mode.dev_ctrl import DevController
+from modules.desktop_mode.routine_ctrl import RoutineController
+from modules.desktop_mode.system_ctrl import SystemController
+from modules.game_mode.game_ctrl import GameController
+from modules.dev_mode.dev_ctrl import DevController
 
 
-class JarvisMode(Enum):
+class VeloMode(Enum):
     GAME = "Game Mode"
     DESKTOP = "Desktop Mode"
     DEV = "Dev Mode"
@@ -28,7 +23,7 @@ class JarvisMode(Enum):
 
 class StateManager:
     def __init__(self, ui_callback=None, exit_callback=None, mute_ui_callback=None):
-        self.current_mode = JarvisMode.DESKTOP
+        self.current_mode = VeloMode.DESKTOP
         self.ui_callback = ui_callback
         self.exit_callback = exit_callback
         self.tts = TextToSpeech(on_mute_change=mute_ui_callback)
@@ -41,7 +36,9 @@ class StateManager:
 
         # Geriye dönük uyumluluk için referans
         self.system_ctrl = self.desktop_ctrl
-
+        self.routine_ctrl = RoutineController(state_manager=self)
+        self.routine_ctrl.start_context_watcher()
+        
     def greet_user(self):
         """Uygulama açılışında saate göre selam verir ve gününü sorar."""
         hour = datetime.datetime.now().hour
@@ -57,23 +54,23 @@ class StateManager:
         # Karşılama mesajını kayan pencere hafızasına kaydet
         self.llm_parser.add_history("", greeting)
 
-    def set_mode(self, new_mode: Union[str, JarvisMode]) -> str:
+    def set_mode(self, new_mode: Union[str, VeloMode]) -> str:
         target_mode = None
 
         if isinstance(new_mode, str):
             clean_str = new_mode.strip().lower()
             if any(k in clean_str for k in ["game", "gaming"]):
-                target_mode = JarvisMode.GAME
+                target_mode = VeloMode.GAME
             elif any(k in clean_str for k in ["desktop", "normal"]):
-                target_mode = JarvisMode.DESKTOP
+                target_mode = VeloMode.DESKTOP
             elif any(k in clean_str for k in ["dev", "work", "code", "coding", "developer", "test", "sandbox"]):
-                target_mode = JarvisMode.DEV
+                target_mode = VeloMode.DEV
             else:
-                for mode in JarvisMode:
+                for mode in VeloMode:
                     if (clean_str in mode.value.lower()) or (clean_str in mode.name.lower()):
                         target_mode = mode
                         break
-        elif isinstance(new_mode, JarvisMode):
+        elif isinstance(new_mode, VeloMode):
             target_mode = new_mode
 
         if not target_mode:
@@ -96,8 +93,17 @@ class StateManager:
         return msg
 
     def process_command(self, command_text: str) -> str:
-        cmd = command_text.strip().lower()
+        cmd = command_text.strip().lower().rstrip(".,!?;:")
+        # 0. SESSİZ BİLGİ VE YARDIM KOMUTLARI (TTS kullanmaz)
+        if cmd in ["info", "commands", "command list", "show commands"]:
+            info_text = self._get_mode_info()
+            self._log(info_text)
+            return info_text
 
+        elif cmd in ["help", "detailed help", "guide", "manual"]:
+            help_text = self._get_detailed_help()
+            self._log(help_text)
+            return help_text
         # 1. KAPANIŞ KOMUTLARI
         if any(k in cmd for k in ["quit", "bye bye", "bye", "exit", "kill yourself", "close velo", "goodbye"]):
             response = "Goodbye. Shutting down Velo."
@@ -131,23 +137,29 @@ class StateManager:
 
         # 3. MOD DEĞİŞTİRME KOMUTLARI
         if any(k in cmd for k in ["game mode", "switch to game", "gaming mode"]):
-            return self.set_mode(JarvisMode.GAME)
+            return self.set_mode(VeloMode.GAME)
         elif any(k in cmd for k in ["desktop mode", "switch to desktop", "normal mode"]):
-            return self.set_mode(JarvisMode.DESKTOP)
+            return self.set_mode(VeloMode.DESKTOP)
         elif any(k in cmd for k in [
             "dev mode", "switch to dev", "developer mode",
             "work mode", "coding mode", "test mode", "sandbox"
         ]):
-            return self.set_mode(JarvisMode.DEV)
-
+            return self.set_mode(VeloMode.DEV)
+        # 3.5 ÖZEL KOMUTLAR VE OTOMATİK RUTİNLER (Tüm modlarda 0ms öncelikli)
+        routine_response = self.routine_ctrl.handle_command(cmd)
+        if routine_response:
+            self._log(f"[Routine]: {routine_response}")
+            self.tts.speak(routine_response)
+            return routine_response
         # 4. AKTİF MODA GÖRE DİNAMİK YÖNLENDİRME (Kural Motoru -> Yerel LLM)
-        if self.current_mode == JarvisMode.GAME:
+        if self.current_mode == VeloMode.GAME:
             controller = self.game_ctrl
-        elif self.current_mode == JarvisMode.DEV:
+        elif self.current_mode == VeloMode.DEV:
             controller = self.dev_ctrl
         else:
             controller = self.desktop_ctrl
 
+        
         # Önce sıfır gecikmeli kural motorunu dene
         result = controller.handle_command(cmd)
 
@@ -168,3 +180,62 @@ class StateManager:
     def _log(self, message: str):
         if self.ui_callback:
             self.ui_callback(message)
+    def _get_mode_info(self) -> str:
+        custom_triggers = list(self.routine_ctrl.config.get("single_actions", {}).keys())
+        routine_triggers = list(self.routine_ctrl.config.get("routines", {}).keys())
+        custom_str = ", ".join(custom_triggers + routine_triggers) if (custom_triggers or routine_triggers) else "None"
+
+        if self.current_mode == VeloMode.DESKTOP:
+            mode_cmds = (
+                "• App & Web: open <app>, play <song/video>, search <query>\n"
+                "• Media: volume up/down, pause, resume, next, skip forward, rewind\n"
+                "• System: system status, refresh apps, mute/unmute, quit"
+            )
+        elif self.current_mode == VeloMode.GAME:
+            mode_cmds = (
+                "• Sim Racing: check telemetry, fuel status, tire temp, start racing\n"
+                "• Hardware: system status, hardware temp, CPU/RAM usage\n"
+                "• Media: volume up/down, pause, resume, next, skip forward, rewind"
+            )
+        else:  # DEV MODE
+            mode_cmds = (
+                "• Workspace: start coding, open dev workspace\n"
+                "• Clipboard AI: explain what I copied, read clipboard, debug this error\n"
+                "• Media & Apps: open <app>, play <music>, volume controls"
+            )
+
+        return (
+            f"\n--- [{self.current_mode.value.upper()} - COMMAND LIST] ---\n"
+            f"{mode_cmds}\n"
+            f"• Custom & Routines: {custom_str}\n"
+            f"• Navigation: game mode | desktop mode | dev mode | help\n"
+            f"-------------------------------------------"
+        )
+
+    def _get_detailed_help(self) -> str:
+        return (
+            "\n================ VELO ASSISTANT HELP ================\n"
+            "1. WAKE WORDS & HOTKEYS:\n"
+            "   - Wake Words : 'Velo', 'Hey Velo', 'Service'\n"
+            "   - Ctrl + R   : Instant Hot-Reload (preserves chat history)\n"
+            "   - Close (X)  : Minimizes Velo to Windows System Tray\n\n"
+            "2. DESKTOP MODE COMMANDS:\n"
+            "   - 'open <app>'        : Launches apps/sites (e.g., 'open spotify', 'open vscode')\n"
+            "   - 'play <query>'      : Plays top matching video/song on YouTube\n"
+            "   - 'skip forward'      : Skips 5 seconds ahead in active video\n"
+            "   - 'rewind'            : Rewinds 5 seconds back in active video\n"
+            "   - 'volume up / down'  : Adjusts Windows master volume\n"
+            "   - 'system status'     : Reports live CPU and RAM usage\n\n"
+            "3. GAME MODE COMMANDS:\n"
+            "   - 'start racing'      : Launches Content Manager + Discord together\n"
+            "   - 'check telemetry'   : Reads live Assetto Corsa fuel & tire temps\n"
+            "   - 'hardware temp'     : Checks system CPU/thermal status\n\n"
+            "4. DEV MODE COMMANDS:\n"
+            "   - 'start coding'      : Opens Visual Studio Code workspace\n"
+            "   - 'explain what I copied' : Summarizes copied code/error from clipboard\n\n"
+            "5. CUSTOM ROUTINES (config/custom_commands.json):\n"
+            "   - 'play my playlist'  : Opens your configured Spotify playlist URI\n"
+            "   - 'focus session'     : Switches to Dev Mode + VS Code + Lo-fi music\n"
+            "   - 'night drive'       : Switches to Game Mode + Content Manager + Discord\n"
+            "====================================================="
+        )

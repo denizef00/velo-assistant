@@ -1,0 +1,43 @@
+{
+  "single_actions": {
+    "play my playlist": {
+      "type": "uri",
+      "target": "spotify:playlist:5nXQ33mBMGihNJJo9Oaq8Z?si=2b87c70178584cda",
+      "response": "Starting your Spotify playlist."
+    },
+    "open notion": {
+      "type": "url",
+      "target": "https://app.notion.com/p/Admin-Panel-417b933b013a8028b03ce680dab4d23f",
+      "response": "Opening Notion workspace."
+    }
+  },
+  "routines": {
+    "night drive": {
+      "response": "Preparing night drive setup. Switching to Game Mode.",
+      "steps": [
+        { "action": "mode", "value": "game" },
+        { "action": "launch", "value": "Steam" },
+        {
+          "action": "play_youtube",
+          "value": "wegh ömerhayyam"
+        }
+      ]
+    },
+    "focus session": {
+      "response": "Starting focus session. Launching VS Code and ambient music.",
+      "steps": [
+        { "action": "mode", "value": "dev" },
+        { "action": "launch", "value": "Visual Studio Code" },
+        {
+          "action": "play_youtube",
+          "value": "lofi hip hop radio beats to relax study to"
+        }
+      ]
+    }
+  },
+  "auto_context": {
+    "acs.exe": "game",
+    "Steam.exe": "game",
+    "Code.exe": "dev"
+  }
+}

@@ -5,12 +5,10 @@ import subprocess
 from typing import Optional
 import psutil
 
-try:
-    from modules.desktop_mode.system_ctrl import SystemController
-    from modules.game_mode.ac_telemetry import ACTelemetryReader
-except ImportError:
-    from moduls.desktop_mode.system_ctrl import SystemController
-    from modules.game_mode.ac_telemetry import ACTelemetryReader
+
+from modules.desktop_mode.system_ctrl import SystemController
+from modules.game_mode.ac_telemetry import ACTelemetryReader
+
 
 
 class GameController(SystemController):
